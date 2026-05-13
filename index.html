@@ -3,593 +3,928 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-    <title>便携小风扇</title>
+    <title>便携清凉神器</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(180deg, #e8f4f8 0%, #d1ecf1 50%, #b8e0e8 100%);
             font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             -webkit-user-select: none;
             user-select: none;
-            overflow: hidden;
+            transition: background 0.6s;
+            overflow-x: hidden;
+            padding-bottom: 30px;
+        }
+        body.fan-theme {
+            background: linear-gradient(180deg, #e8f4f8 0%, #d1ecf1 50%, #b8e0e8 100%);
+        }
+        body.ac-theme {
+            background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
         }
 
-        h2 {
-            color: #546e7a;
-            font-size: 22px;
+        /* ===== 顶部切换 ===== */
+        .switcher {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            display: flex;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .switcher-btn {
+            padding: 10px 28px;
+            border-radius: 26px;
+            border: none;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 4px;
-            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: #78909c;
+            letter-spacing: 1px;
+        }
+        .switcher-btn.active {
+            background: #fff;
+            color: #37474f;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         h5 {
             color: #90a4ae;
             font-size: 13px;
             font-weight: 400;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 4px;
         }
+        h5 svg { width: 18px; height: 18px; fill: #ffca28; }
 
-        h5 svg {
-            width: 18px;
-            height: 18px;
-            fill: #ffca28;
-            vertical-align: middle;
-        }
+        /* ===== 页面容器 ===== */
+        .page { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .page.visible { display: flex; }
 
-        /* ===== 风扇主体 ===== */
+        /* ========================================
+           风扇样式
+           ======================================== */
         .fan-body {
-            width: 280px;
+            width: 290px;
             background: linear-gradient(180deg, #ffffff, #f5f7fa);
             border-radius: 24px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
-            padding: 30px 20px 20px;
+            padding: 28px 20px 22px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow: hidden;
         }
-
-        .fan-body .top {
+        .fan-body .top-bar {
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 6px;
+            height: 5px;
             background: linear-gradient(90deg, #42a5f5, #66bb6a, #42a5f5);
             border-radius: 24px 24px 0 0;
         }
+        .brand { font-size: 10px; color: #b0bec5; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
 
-        /* 品牌标志 */
-        .brand {
-            font-size: 11px;
-            color: #b0bec5;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 16px;
-        }
+        /* 摇头 */
+        .oscillate-wrap { perspective: 600px; }
+        .oscillate-wrap.oscillating .fan-head-wrap { animation: oscillate 3s ease-in-out infinite; }
+        @keyframes oscillate { 0%,100%{transform:rotateY(-25deg)} 50%{transform:rotateY(25deg)} }
+        .fan-head-wrap { transition: transform 0.3s; }
 
-        /* 风扇头 - 摇头容器 */
-        .oscillate-wrap {
-            perspective: 600px;
-        }
-
-        .oscillate-wrap.oscillating .fan-head-wrap {
-            animation: oscillate 3s ease-in-out infinite;
-        }
-
-        @keyframes oscillate {
-            0%, 100% { transform: rotateY(-25deg); }
-            50% { transform: rotateY(25deg); }
-        }
-
-        .fan-head-wrap {
-            transition: transform 0.3s;
-        }
-
-        /* 风扇头 */
-        .fan-head {
-            width: 180px;
-            height: 180px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* 外圈网罩 */
+        .fan-head { width: 170px; height: 170px; position: relative; display: flex; align-items: center; justify-content: center; }
         .cage {
-            position: absolute;
-            width: 174px;
-            height: 174px;
-            border: 3px solid #cfd8dc;
-            border-radius: 50%;
+            position: absolute; width: 164px; height: 164px;
+            border: 3px solid #cfd8dc; border-radius: 50%;
             background: radial-gradient(circle, transparent 35%, rgba(207,216,220,0.06) 100%);
         }
+        .cage-line { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(176,190,197,0.25); transform-origin: center; }
 
-        .cage-line {
-            position: absolute;
-            top: 50%; left: 0;
-            width: 100%; height: 1px;
-            background: rgba(176,190,197,0.25);
-            transform-origin: center;
-        }
-
-        /* 扇叶 */
-        .blades {
-            width: 150px;
-            height: 150px;
-            position: relative;
-        }
-
-        .blades.spinning {
-            animation: spin var(--speed, 2s) linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .blade {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 60px; height: 6px;
-            transform-origin: 0 50%;
-        }
-
+        .blades { width: 140px; height: 140px; position: relative; }
+        .blades.spinning { animation: spin var(--speed, 2s) linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .blade { position: absolute; top: 50%; left: 50%; width: 55px; height: 5px; transform-origin: 0 50%; }
         .blade::before {
-            content: '';
-            position: absolute;
-            top: -24px; left: 8px;
-            width: 52px; height: 54px;
-            border-radius: 0 70% 70% 0;
-            transform: skewY(-5deg);
+            content: ''; position: absolute; top: -22px; left: 8px;
+            width: 48px; height: 50px; border-radius: 0 70% 70% 0; transform: skewY(-5deg);
         }
-
-        .blade:nth-child(1) { transform: rotate(0deg); }
-        .blade:nth-child(2) { transform: rotate(72deg); }
-        .blade:nth-child(3) { transform: rotate(144deg); }
-        .blade:nth-child(4) { transform: rotate(216deg); }
-        .blade:nth-child(5) { transform: rotate(288deg); }
-
-        .blade:nth-child(odd)::before {
-            background: linear-gradient(135deg, rgba(66,165,245,0.8), rgba(41,121,255,0.6));
-        }
-        .blade:nth-child(even)::before {
-            background: linear-gradient(135deg, rgba(79,195,247,0.8), rgba(66,165,245,0.6));
-        }
+        .blade:nth-child(1){transform:rotate(0deg)} .blade:nth-child(2){transform:rotate(72deg)}
+        .blade:nth-child(3){transform:rotate(144deg)} .blade:nth-child(4){transform:rotate(216deg)}
+        .blade:nth-child(5){transform:rotate(288deg)}
+        .blade:nth-child(odd)::before { background: linear-gradient(135deg, rgba(66,165,245,0.8), rgba(41,121,255,0.6)); }
+        .blade:nth-child(even)::before { background: linear-gradient(135deg, rgba(79,195,247,0.8), rgba(66,165,245,0.6)); }
 
         .center-hub {
-            position: absolute;
-            width: 36px; height: 36px;
+            position: absolute; width: 34px; height: 34px; z-index: 2;
             background: radial-gradient(circle at 35% 35%, #fff, #cfd8dc);
-            border: 2px solid #b0bec5;
-            border-radius: 50%;
+            border: 2px solid #b0bec5; border-radius: 50%;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            z-index: 2;
         }
 
-        /* 显示区域 */
-        .display {
-            margin-top: 16px;
-            text-align: center;
-        }
+        .fan-display { margin-top: 14px; text-align: center; }
+        .fan-display .mode-label { font-size: 12px; color: #90a4ae; letter-spacing: 1px; min-height: 18px; }
+        .fan-display .speed-text { font-size: 34px; font-weight: 200; color: #37474f; line-height: 1.2; }
+        .fan-display .speed-text i { font-style: normal; font-size: 15px; color: #78909c; }
 
-        .display .mode-label {
-            font-size: 12px;
-            color: #90a4ae;
-            letter-spacing: 1px;
-            min-height: 18px;
-        }
+        /* 风效果 */
+        .wind-area { width: 290px; height: 50px; display: flex; justify-content: center; gap: 6px; overflow: hidden; }
+        .wind-strip { width: 3px; height: 0; background: linear-gradient(180deg, rgba(66,165,245,0.4), transparent); border-radius: 2px; }
+        .wind-strip.active { animation: windBlow var(--wind-speed, 1.5s) ease-in-out infinite; }
+        @keyframes windBlow { 0%,100%{height:8px;opacity:0.3} 50%{height:45px;opacity:0.7} }
 
-        .display .speed-text {
-            font-size: 36px;
-            font-weight: 200;
-            color: #37474f;
-            line-height: 1.2;
-        }
+        /* ===== 风扇按钮 ===== */
+        .fan-controls { width: 290px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
-        .display .speed-text i {
-            font-style: normal;
-            font-size: 16px;
-            color: #78909c;
-        }
-
-        .status-icon {
-            display: block;
-            width: 20px;
-            height: 20px;
-            margin: 8px auto 0;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .status-icon.on {
-            opacity: 1;
-        }
-
-        /* ===== 风吹出效果 ===== */
-        .wind-area {
-            width: 280px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            overflow: hidden;
-        }
-
-        .wind-strip {
-            width: 3px;
-            height: 0;
-            background: linear-gradient(180deg, rgba(66,165,245,0.4), transparent);
-            border-radius: 2px;
-            transition: height 0.5s;
-        }
-
-        .wind-strip.active {
-            animation: windBlow var(--wind-speed, 1.5s) ease-in-out infinite;
-        }
-
-        @keyframes windBlow {
-            0%, 100% { height: 10px; opacity: 0.3; }
-            50% { height: 50px; opacity: 0.7; }
-        }
-
-        /* ===== 按钮组 ===== */
-        .buttons {
-            width: 280px;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 10px;
-        }
-
-        .button {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-            position: relative;
-        }
-
-        .button:active {
-            transform: scale(0.92);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        }
-
-        .button svg {
-            width: 26px;
-            height: 26px;
-            fill: #fff;
-        }
-
-        .button.inactive svg {
-            fill: #78909c;
-        }
-
-        /* 开关按钮 */
-        .btn-power {
+        /* 开关按钮 - 最上面 */
+        .power-row { display: flex; justify-content: center; }
+        .btn-power-fan {
+            width: 64px; height: 64px; border-radius: 50%; border: none; cursor: pointer;
             background: linear-gradient(135deg, #66bb6a, #43a047);
+            box-shadow: 0 4px 14px rgba(76,175,80,0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s; position: relative;
         }
-        .btn-power.off {
-            background: linear-gradient(135deg, #ef5350, #e53935);
+        .btn-power-fan:active { transform: scale(0.92); }
+        .btn-power-fan.on { background: linear-gradient(135deg, #ef5350, #e53935); box-shadow: 0 4px 14px rgba(239,83,80,0.35); }
+        .btn-power-fan svg { width: 30px; height: 30px; fill: #fff; }
+        .power-label { font-size: 12px; color: #78909c; margin-top: 4px; text-align: center; }
+
+        /* 挡位按钮 - 中间 */
+        .speed-row {
+            display: flex; gap: 18px; background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .speed-btn {
+            width: 52px; height: 52px; border-radius: 50%; border: 3px solid #e0e0e0;
+            background: #f5f5f5; cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: all 0.25s;
+            font-size: 10px; color: #999; font-weight: 600; gap: 2px;
+        }
+        .speed-btn:active { transform: scale(0.92); }
+        .speed-btn svg { width: 18px; height: 18px; fill: #999; }
+        .speed-btn.active-low { border-color: #66bb6a; background: #e8f5e9; color: #43a047; }
+        .speed-btn.active-low svg { fill: #43a047; }
+        .speed-btn.active-mid { border-color: #ffa726; background: #fff3e0; color: #f57c00; }
+        .speed-btn.active-mid svg { fill: #f57c00; }
+        .speed-btn.active-high { border-color: #ef5350; background: #ffebee; color: #e53935; }
+        .speed-btn.active-high svg { fill: #e53935; }
+
+        /* 底部功能按钮 */
+        .func-row {
+            display: flex; gap: 20px;
+        }
+        .func-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+        }
+        .func-btn-circle {
+            width: 48px; height: 48px; border-radius: 50%; border: none;
+            background: #e0e0e0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .func-btn-circle:active { transform: scale(0.92); }
+        .func-btn-circle svg { width: 22px; height: 22px; fill: #78909c; }
+        .func-btn-circle.active { background: linear-gradient(135deg, #42a5f5, #1e88e5); box-shadow: 0 3px 12px rgba(66,165,245,0.4); }
+        .func-btn-circle.active svg { fill: #fff; }
+        .func-btn-label { font-size: 11px; color: #90a4ae; }
+
+        /* 定时弹窗 */
+        .timer-display {
+            font-size: 13px; color: #42a5f5; margin-top: 6px;
+            min-height: 20px; font-weight: 600; letter-spacing: 1px;
         }
 
-        /* 挡位按钮 */
-        .btn-low {
-            background: linear-gradient(135deg, #81c784, #66bb6a);
+        /* ========================================
+           空调样式
+           ======================================== */
+        /* 背景氛围变化 */
+        body.ac-theme { transition: background 0.8s; }
+        body.ac-theme.cooling {
+            background: linear-gradient(180deg, #d6eaf8 0%, #aed6f1 50%, #85c1e9 100%);
         }
-        .btn-low.active {
-            box-shadow: 0 3px 16px rgba(102,187,106,0.5);
-        }
-
-        .btn-mid {
-            background: linear-gradient(135deg, #ffb74d, #ffa726);
-        }
-        .btn-mid.active {
-            box-shadow: 0 3px 16px rgba(255,167,38,0.5);
+        body.ac-theme.heating {
+            background: linear-gradient(180deg, #fdebd0 0%, #f5cba7 50%, #edbb99 100%);
         }
 
-        .btn-high {
-            background: linear-gradient(135deg, #ef5350, #e53935);
-        }
-        .btn-high.active {
-            box-shadow: 0 3px 16px rgba(239,83,80,0.5);
-        }
-
-        /* 摇头按钮 */
-        .btn-swing {
-            background: linear-gradient(135deg, #42a5f5, #1e88e5);
-        }
-        .btn-swing.active {
-            box-shadow: 0 3px 16px rgba(66,165,245,0.5);
-        }
-
-        .button.inactive {
-            background: #e0e0e0 !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        /* 按钮标签 */
-        .btn-label {
-            font-size: 11px;
-            color: #90a4ae;
-            margin-top: 4px;
-            text-align: center;
-        }
-
-        .btn-group {
+        /* 空调机身 - 仿真壁挂空调 */
+        .ac-unit {
+            width: 300px;
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* 底部 */
-        .bottom-link {
-            margin-top: 28px;
-            font-size: 12px;
-            color: #b0bec5;
-            text-decoration: none;
+        .ac-body {
+            width: 300px;
+            height: 110px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e8ecef 40%, #dde2e6 100%);
+            border-radius: 16px 16px 4px 4px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06),
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 空调顶部装饰线 */
+        .ac-body .top-bar {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #42a5f5, #ab47bc, #42a5f5);
+            border-radius: 16px 16px 0 0;
+            transition: background 0.5s;
+        }
+
+        /* 品牌logo区 */
+        .ac-logo-area {
+            position: absolute;
+            top: 12px; left: 20px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .ac-logo-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #ccc; transition: all 0.5s;
+        }
+        .ac-logo-dot.on-cool { background: #42a5f5; box-shadow: 0 0 8px rgba(66,165,245,0.6); }
+        .ac-logo-dot.on-hot { background: #ff7043; box-shadow: 0 0 8px rgba(255,112,67,0.6); }
+        .ac-brand-text {
+            font-size: 9px; color: #b0b8c0; letter-spacing: 2px;
+            text-transform: uppercase; font-weight: 600;
+        }
+
+        /* 空调显示屏 */
+        .ac-screen {
+            position: absolute;
+            top: 14px; right: 20px;
+            background: rgba(0,0,0,0.75);
+            border-radius: 6px;
+            padding: 4px 12px;
+            display: flex; align-items: baseline; gap: 3px;
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .ac-screen.on { opacity: 1; }
+        .ac-screen-temp {
+            font-size: 28px; font-weight: 300; color: #4fc3f7;
+            font-family: 'Courier New', monospace;
+        }
+        .ac-screen-unit { font-size: 12px; color: #4fc3f7; }
+        .ac-screen-mode {
+            font-size: 9px; color: #81d4fa; margin-left: 4px;
             letter-spacing: 1px;
         }
+        .ac-screen.hot .ac-screen-temp,
+        .ac-screen.hot .ac-screen-unit { color: #ffab91; }
+        .ac-screen.hot .ac-screen-mode { color: #ffccbc; }
 
-        .bottom-link span {
-            color: #90caf9;
-        }
-
-        /* 选中指示环 */
-        .button::after {
-            content: '';
+        /* 空调进风口格栅 */
+        .ac-grille {
             position: absolute;
-            inset: -4px;
-            border: 2px solid transparent;
+            top: 50px; left: 16px; right: 16px;
+            display: flex; flex-direction: column; gap: 3px;
+        }
+        .ac-grille-line {
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.06) 80%, transparent 100%);
+            border-radius: 1px;
+        }
+
+        /* 空调出风口挡板 */
+        .ac-flap-area {
+            width: 300px;
+            height: 18px;
+            position: relative;
+            overflow: visible;
+        }
+        .ac-flap {
+            width: 280px;
+            height: 14px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #d5dbe0, #c8cfd5);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transform-origin: top center;
+            transition: transform 0.8s ease;
+        }
+        .ac-flap.open {
+            transform: perspective(200px) rotateX(-45deg);
+        }
+        .ac-flap-inner {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; gap: 4px;
+            align-items: center; padding: 0 20px;
+        }
+        .ac-flap-slot {
+            flex: 1; height: 2px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 1px;
+        }
+
+        /* 温度显示 - 机身外 */
+        .ac-display {
+            text-align: center;
+            margin: 14px 0 6px;
+        }
+        .ac-mode-label {
+            font-size: 13px; color: #90a4ae;
+            letter-spacing: 1px; min-height: 18px;
+            transition: color 0.5s;
+        }
+        .ac-temp {
+            font-size: 56px; font-weight: 200; color: #37474f; line-height: 1;
+            display: flex; align-items: flex-start; justify-content: center;
+            transition: color 0.5s;
+        }
+        .ac-temp i { font-style: normal; font-size: 18px; color: #78909c; margin-top: 6px; }
+
+        /* ===== 冷暖风粒子效果 ===== */
+        .ac-particles {
+            width: 300px;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        /* 冷风粒子 - 雪花/冰晶 */
+        .snow-particle {
+            position: absolute;
+            color: rgba(66,165,245,0.7);
+            font-size: 14px;
+            opacity: 0;
+            animation: snowFall 3s linear infinite;
+            text-shadow: 0 0 4px rgba(100,181,246,0.5);
+        }
+        @keyframes snowFall {
+            0% { opacity: 0; transform: translateY(-10px) rotate(0deg) scale(0.5); }
+            15% { opacity: 0.9; }
+            85% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(110px) rotate(360deg) scale(0.3); }
+        }
+
+        /* 冷气雾效 */
+        .cold-mist {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(173,216,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            animation: mistPulse 3s ease-in-out infinite;
+        }
+        .cold-mist.active { opacity: 1; }
+        @keyframes mistPulse {
+            0%,100% { opacity: 0.3; transform: scaleY(0.8); }
+            50% { opacity: 0.7; transform: scaleY(1.1); }
+        }
+
+        /* 暖风粒子 - 热浪 */
+        .heat-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            transition: border-color 0.2s;
+            background: radial-gradient(circle, rgba(255,152,0,0.4), transparent);
+            opacity: 0;
+            animation: heatRise 2.5s ease-out infinite;
+        }
+        @keyframes heatRise {
+            0% { opacity: 0; transform: translateY(-10px) scale(0.3); }
+            20% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(100px) scale(1.5); }
         }
 
-        .button.active::after {
-            border-color: rgba(255,255,255,0.6);
+        /* 热浪波纹 */
+        .heat-wave {
+            position: absolute;
+            width: 100%;
+            top: 0; left: 0;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                rgba(255,152,0,0.05) 4px,
+                transparent 8px
+            );
+            opacity: 0;
+            animation: waveShimmer 2s ease-in-out infinite;
+        }
+        .heat-wave.active { opacity: 1; }
+        @keyframes waveShimmer {
+            0%,100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(6px); opacity: 0.6; }
         }
 
-        /* 风扇关闭时扇叶减速 */
-        .blades.stopping {
-            animation: spin 3s linear;
-            animation-iteration-count: 1;
-            animation-fill-mode: forwards;
+        /* 风条效果增强 */
+        .ac-wind-area { width: 300px; height: 0; overflow: hidden; transition: height 0.5s; }
+        .ac-wind-area.active { height: 10px; }
+        .ac-wind-strip { width: 3px; height: 0; border-radius: 2px; display: inline-block; margin: 0 4px; }
+        .ac-wind-strip.cool { background: linear-gradient(180deg, rgba(66,165,245,0.5), transparent); }
+        .ac-wind-strip.warm { background: linear-gradient(180deg, rgba(255,152,0,0.5), transparent); }
+        .ac-wind-strip.active { animation: windBlow 1s ease-in-out infinite; }
+
+        /* 空调按钮 */
+        .ac-controls { width: 290px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+        .ac-btn-row { display: flex; gap: 16px; align-items: center; }
+        .ac-btn {
+            width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .ac-btn:active { transform: scale(0.92); }
+        .ac-btn svg { width: 26px; height: 26px; fill: #fff; }
+        .ac-btn-power { background: linear-gradient(135deg, #66bb6a, #43a047); }
+        .ac-btn-power.on { background: linear-gradient(135deg, #ef5350, #e53935); }
+        .ac-btn-cold { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+        .ac-btn-cold.inactive { background: #e0e0e0; }
+        .ac-btn-cold.inactive svg { fill: #999; }
+        .ac-btn-hot { background: linear-gradient(135deg, #ffa726, #fb8c00); }
+        .ac-btn-hot.inactive { background: #e0e0e0; }
+        .ac-btn-hot.inactive svg { fill: #999; }
+        .ac-temp-btn {
+            width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer;
+            background: #e8e8e8; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .ac-temp-btn:active { transform: scale(0.9); background: #d0d0d0; }
+        .ac-temp-btn svg { width: 22px; height: 22px; fill: #546e7a; }
+        .ac-btn-label { font-size: 11px; color: #90a4ae; margin-top: 3px; text-align: center; }
+        .ac-btn-group { display: flex; flex-direction: column; align-items: center; }
+
+        /* ===== 微信遮罩 ===== */
+        #wxMask {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.85); color: #fff;
+            flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 80px; text-align: center; font-size: 18px; line-height: 2;
         }
     </style>
 </head>
-<body>
+<body class="fan-theme">
 
-<!-- 微信遮罩引导 -->
-<div id="wxMask" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); color:#fff; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:80px; text-align:center; font-size:18px; line-height:2;">
-    <div style="position:absolute; top:20px; right:24px;">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.07-1.38"/><path d="M16 3.5l4 0l0 4"/><path d="M20 3.5l-6 6"/></svg>
-    </div>
-    <div style="font-size:50px; margin-bottom:10px;">↗</div>
+<!-- 微信遮罩 -->
+<div id="wxMask">
+    <div style="font-size:50px;margin-bottom:10px">↗</div>
     <div>请点击右上角 <b>「···」</b></div>
     <div>选择 <b>「在浏览器中打开」</b></div>
-    <div style="margin-top:20px; font-size:14px; color:#aaa;">微信内无法正常使用，需在浏览器中打开</div>
+    <div style="margin-top:20px;font-size:14px;color:#aaa">微信内无法正常使用，需在浏览器中打开</div>
 </div>
-
 <script>
-// 检测微信浏览器
-(function(){
-    var ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('micromessenger') !== -1) {
-        document.getElementById('wxMask').style.display = 'flex';
-    }
-})();
+(function(){if(navigator.userAgent.toLowerCase().indexOf('micromessenger')!==-1)document.getElementById('wxMask').style.display='flex';})();
 </script>
 
-<h2>便携小风扇</h2>
-<h5>
-    <svg viewBox="0 0 24 24"><path d="M12 3c-.46 0-.93.04-1.4.14-2.76.53-4.96 2.76-5.48 5.52-.48 2.61.48 5.01 2.22 6.56.43.38.66.91.66 1.47V19c0 1.1.9 2 2 2h.28c.35.6.98 1 1.72 1s1.38-.4 1.72-1H14c1.1 0 2-.9 2-2v-2.31c0-.55.22-1.09.64-1.46C18.09 13.95 19 12.08 19 10c0-3.87-3.13-7-7-7z"/></svg>
-    <span>Tip: 清凉一夏，随身携带！</span>
-</h5>
+<!-- 切换按钮 -->
+<div class="switcher">
+    <button class="switcher-btn active" id="swFan" onclick="switchTo('fan')">小风扇</button>
+    <button class="switcher-btn" id="swAC" onclick="switchTo('ac')">空调</button>
+</div>
 
-<div class="fan-body">
-    <div class="top"></div>
-    <div class="brand">MINI FAN</div>
+<!-- ==================== 风扇页面 ==================== -->
+<div class="page visible" id="fanPage">
+    <h5>
+        <svg viewBox="0 0 24 24"><path d="M12 3c-.46 0-.93.04-1.4.14-2.76.53-4.96 2.76-5.48 5.52-.48 2.61.48 5.01 2.22 6.56.43.38.66.91.66 1.47V19c0 1.1.9 2 2 2h.28c.35.6.98 1 1.72 1s1.38-.4 1.72-1H14c1.1 0 2-.9 2-2v-2.31c0-.55.22-1.09.64-1.46C18.09 13.95 19 12.08 19 10c0-3.87-3.13-7-7-7z"/></svg>
+        <span>Tip: 清凉一夏，随身携带！</span>
+    </h5>
 
-    <div class="oscillate-wrap" id="oscillateWrap">
-        <div class="fan-head-wrap">
-            <div class="fan-head">
-                <div class="cage">
-                    <div class="cage-line" style="transform:rotate(0deg)"></div>
-                    <div class="cage-line" style="transform:rotate(30deg)"></div>
-                    <div class="cage-line" style="transform:rotate(60deg)"></div>
-                    <div class="cage-line" style="transform:rotate(90deg)"></div>
-                    <div class="cage-line" style="transform:rotate(120deg)"></div>
-                    <div class="cage-line" style="transform:rotate(150deg)"></div>
+    <div class="fan-body">
+        <div class="top-bar"></div>
+        <div class="brand">MINI FAN</div>
+        <div class="oscillate-wrap" id="oscillateWrap">
+            <div class="fan-head-wrap">
+                <div class="fan-head">
+                    <div class="cage">
+                        <div class="cage-line" style="transform:rotate(0deg)"></div>
+                        <div class="cage-line" style="transform:rotate(30deg)"></div>
+                        <div class="cage-line" style="transform:rotate(60deg)"></div>
+                        <div class="cage-line" style="transform:rotate(90deg)"></div>
+                        <div class="cage-line" style="transform:rotate(120deg)"></div>
+                        <div class="cage-line" style="transform:rotate(150deg)"></div>
+                    </div>
+                    <div class="blades" id="blades">
+                        <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+                        <div class="blade"></div><div class="blade"></div>
+                    </div>
+                    <div class="center-hub"></div>
                 </div>
-                <div class="blades" id="blades">
-                    <div class="blade"></div>
-                    <div class="blade"></div>
-                    <div class="blade"></div>
-                    <div class="blade"></div>
-                    <div class="blade"></div>
+            </div>
+        </div>
+        <div class="fan-display">
+            <div class="mode-label" id="fanModeLabel">已关闭</div>
+            <div class="speed-text" id="fanSpeedText">0 <i>级</i></div>
+        </div>
+    </div>
+
+    <!-- 风效果 -->
+    <div class="wind-area" id="windArea">
+        <div class="wind-strip" style="animation-delay:0s"></div>
+        <div class="wind-strip" style="animation-delay:0.15s"></div>
+        <div class="wind-strip" style="animation-delay:0.3s"></div>
+        <div class="wind-strip" style="animation-delay:0.05s"></div>
+        <div class="wind-strip" style="animation-delay:0.2s"></div>
+        <div class="wind-strip" style="animation-delay:0.35s"></div>
+        <div class="wind-strip" style="animation-delay:0.1s"></div>
+        <div class="wind-strip" style="animation-delay:0.25s"></div>
+        <div class="wind-strip" style="animation-delay:0.4s"></div>
+    </div>
+
+    <!-- 风扇控制面板 -->
+    <div class="fan-controls">
+        <!-- 第一行：开关 -->
+        <div class="power-row">
+            <div style="display:flex;flex-direction:column;align-items:center">
+                <button class="btn-power-fan" id="fanPower" onclick="fanTogglePower()">
+                    <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+                </button>
+                <div class="power-label">开关</div>
+            </div>
+        </div>
+
+        <!-- 第二行：挡位选择 -->
+        <div class="speed-row">
+            <button class="speed-btn" id="fanLow" onclick="fanSetSpeed(1)">
+                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25z"/></svg>
+                <span>低速</span>
+            </button>
+            <button class="speed-btn" id="fanMid" onclick="fanSetSpeed(2)">
+                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zM12 14l.9-2.1L15 11l-2.1-.9L12 8l-.9 2.1L9 11l2.1.9z"/></svg>
+                <span>中速</span>
+            </button>
+            <button class="speed-btn" id="fanHigh" onclick="fanSetSpeed(3)">
+                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zM12 14l.9-2.1L15 11l-2.1-.9L12 8l-.9 2.1L9 11l2.1.9zM5 19l.9-2.1L8 16l-2.1-.9L5 13l-.9 2.1L2 16l2.1.9z"/></svg>
+                <span>高速</span>
+            </button>
+        </div>
+
+        <!-- 第三行：摇头 + 定时 -->
+        <div class="func-row">
+            <div class="func-btn">
+                <button class="func-btn-circle" id="fanSwing" onclick="fanToggleSwing()">
+                    <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                </button>
+                <div class="func-btn-label">摇头</div>
+            </div>
+            <div class="func-btn">
+                <button class="func-btn-circle" id="fanTimer" onclick="fanToggleTimer()">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                </button>
+                <div class="func-btn-label">定时</div>
+            </div>
+        </div>
+
+        <div class="timer-display" id="fanTimerDisplay"></div>
+    </div>
+</div>
+
+<!-- ==================== 空调页面 ==================== -->
+<div class="page" id="acPage">
+    <h5>
+        <svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg>
+        <span>Tip: 为你送上清凉或温暖！</span>
+    </h5>
+
+    <!-- 仿真壁挂空调 -->
+    <div class="ac-unit">
+        <div class="ac-body">
+            <div class="top-bar" id="acTopBar"></div>
+            <!-- logo区 -->
+            <div class="ac-logo-area">
+                <div class="ac-logo-dot" id="acDot"></div>
+                <span class="ac-brand-text">Air Conditioner</span>
+            </div>
+            <!-- LED显示屏 -->
+            <div class="ac-screen" id="acScreen">
+                <span class="ac-screen-temp" id="acScreenTemp">26</span>
+                <span class="ac-screen-unit">°C</span>
+                <span class="ac-screen-mode" id="acScreenMode">COOL</span>
+            </div>
+            <!-- 进风口格栅 -->
+            <div class="ac-grille">
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+                <div class="ac-grille-line"></div>
+            </div>
+        </div>
+        <!-- 出风口挡板 -->
+        <div class="ac-flap-area">
+            <div class="ac-flap" id="acFlap">
+                <div class="ac-flap-inner">
+                    <div class="ac-flap-slot"></div>
+                    <div class="ac-flap-slot"></div>
+                    <div class="ac-flap-slot"></div>
+                    <div class="ac-flap-slot"></div>
+                    <div class="ac-flap-slot"></div>
                 </div>
-                <div class="center-hub"></div>
             </div>
         </div>
     </div>
 
-    <div class="display">
-        <div class="mode-label" id="modeLabel">已关闭</div>
-        <div class="speed-text" id="speedText">0 <i>级</i></div>
+    <!-- 温度显示 -->
+    <div class="ac-display">
+        <div class="ac-mode-label" id="acModeLabel">已关闭</div>
+        <div class="ac-temp"><span id="acTempNum">26</span><i>°C</i></div>
     </div>
 
-    <svg class="status-icon" id="statusIcon" viewBox="0 0 24 24" fill="#66bb6a">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-    </svg>
-</div>
+    <!-- 冷暖风粒子区域 -->
+    <div class="ac-particles" id="acParticles">
+        <div class="cold-mist" id="coldMist"></div>
+        <div class="heat-wave" id="heatWave"></div>
+    </div>
 
-<!-- 风吹出效果 -->
-<div class="wind-area" id="windArea">
-    <div class="wind-strip" style="animation-delay:0s"></div>
-    <div class="wind-strip" style="animation-delay:0.15s"></div>
-    <div class="wind-strip" style="animation-delay:0.3s"></div>
-    <div class="wind-strip" style="animation-delay:0.05s"></div>
-    <div class="wind-strip" style="animation-delay:0.2s"></div>
-    <div class="wind-strip" style="animation-delay:0.35s"></div>
-    <div class="wind-strip" style="animation-delay:0.1s"></div>
-    <div class="wind-strip" style="animation-delay:0.25s"></div>
-    <div class="wind-strip" style="animation-delay:0.4s"></div>
-</div>
-
-<!-- 控制按钮 -->
-<div class="buttons">
-    <div class="btn-group">
-        <div class="button btn-low inactive" id="btnLow" onclick="setSpeed(1)">
-            <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2-1 1.7L10 13V6h2z"/></svg>
+    <!-- 空调控制面板 -->
+    <div class="ac-controls">
+        <div class="ac-btn-row">
+            <div class="ac-btn-group">
+                <button class="ac-btn ac-btn-cold inactive" id="acCold" onclick="acSetMode('cold')">
+                    <svg viewBox="0 0 24 24"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z"/></svg>
+                </button>
+                <div class="ac-btn-label">制冷</div>
+            </div>
+            <div class="ac-btn-group">
+                <button class="ac-btn ac-btn-power" id="acPower" onclick="acTogglePower()">
+                    <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+                </button>
+                <div class="ac-btn-label">开关</div>
+            </div>
+            <div class="ac-btn-group">
+                <button class="ac-btn ac-btn-hot inactive" id="acHot" onclick="acSetMode('hot')">
+                    <svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM4 10.5H1v2h3zm9-9.95h-2V3.5h2zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5v2h3v-2zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41z"/></svg>
+                </button>
+                <div class="ac-btn-label">制热</div>
+            </div>
         </div>
-        <div class="btn-label">低速</div>
-    </div>
-    <div class="btn-group">
-        <div class="button btn-power" id="btnPower" onclick="togglePower()">
-            <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+        <div class="ac-btn-row" style="gap:30px">
+            <div class="ac-btn-group">
+                <button class="ac-temp-btn" onclick="acChangeTemp(1)">
+                    <svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+                </button>
+                <div class="ac-btn-label">升温</div>
+            </div>
+            <div class="ac-btn-group">
+                <button class="ac-temp-btn" onclick="acChangeTemp(-1)">
+                    <svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+                </button>
+                <div class="ac-btn-label">降温</div>
+            </div>
         </div>
-        <div class="btn-label">开关</div>
-    </div>
-    <div class="btn-group">
-        <div class="button btn-mid inactive" id="btnMid" onclick="setSpeed(2)">
-            <svg viewBox="0 0 24 24"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
-        </div>
-        <div class="btn-label">中速</div>
-    </div>
-</div>
-
-<div class="buttons" style="margin-top:12px">
-    <div class="btn-group">
-        <div class="button btn-high inactive" id="btnHigh" onclick="setSpeed(3)">
-            <svg viewBox="0 0 24 24"><path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69zM9.12 17.42c.16-.98.72-1.77 1.32-2.47 1.05-1.22 2.1-2.47 2.37-4.06.03-.17.27-.18.31-.01.65 2.78-1.48 4.16-1.77 6.4-.08.6.14 1.27.53 1.73.08.1-.01.25-.13.21-1.44-.49-2.83-1.28-2.63-1.8z"/></svg>
-        </div>
-        <div class="btn-label">高速</div>
-    </div>
-    <div class="btn-group">
-        <div class="button btn-swing inactive" id="btnSwing" onclick="toggleSwing()">
-            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-        </div>
-        <div class="btn-label">摇头</div>
     </div>
 </div>
-
-<a class="bottom-link" href="javascript:void(0)">
-    <script>document.write(new Date().getFullYear())</script> © Mini Fan <span>- 清凉随行</span>
-</a>
-
-<!-- 音效 -->
-<audio preload="auto" id="clickSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVoGAACA"></audio>
 
 <script>
-(function() {
-    const blades = document.getElementById('blades');
-    const oscillateWrap = document.getElementById('oscillateWrap');
-    const modeLabel = document.getElementById('modeLabel');
-    const speedText = document.getElementById('speedText');
-    const statusIcon = document.getElementById('statusIcon');
-    const btnPower = document.getElementById('btnPower');
-    const btnLow = document.getElementById('btnLow');
-    const btnMid = document.getElementById('btnMid');
-    const btnHigh = document.getElementById('btnHigh');
-    const btnSwing = document.getElementById('btnSwing');
-    const windStrips = document.querySelectorAll('.wind-strip');
-
-    let isOn = false;
-    let currentSpeed = 0;
-    let isSwinging = false;
-
-    const config = {
-        1: { speed: '1.6s',  label: '低速模式',  windSpeed: '2s',    text: '1' },
-        2: { speed: '0.7s',  label: '中速模式',  windSpeed: '1.2s',  text: '2' },
-        3: { speed: '0.3s',  label: '高速模式',  windSpeed: '0.6s',  text: '3' },
+(function(){
+    /* ===== 页面切换 ===== */
+    window.switchTo = function(type) {
+        document.getElementById('fanPage').classList.toggle('visible', type === 'fan');
+        document.getElementById('acPage').classList.toggle('visible', type === 'ac');
+        document.getElementById('swFan').classList.toggle('active', type === 'fan');
+        document.getElementById('swAC').classList.toggle('active', type === 'ac');
+        document.body.classList.toggle('fan-theme', type === 'fan');
+        document.body.classList.toggle('ac-theme', type === 'ac');
     };
 
-    function playClick() {
-        // 简单的点击反馈
-        if (navigator.vibrate) navigator.vibrate(15);
-    }
+    /* ===== 风扇逻辑 ===== */
+    let fanOn = false, fanSpeed = 0, fanSwinging = false;
+    let fanTimerVal = 0, fanTimerInterval = null, fanTimerCountdown = null;
+    const fanCfg = {
+        1: { speed: '1.6s', label: '低速模式', windSpeed: '2s', text: '1' },
+        2: { speed: '0.7s', label: '中速模式', windSpeed: '1.2s', text: '2' },
+        3: { speed: '0.3s', label: '高速模式', windSpeed: '0.6s', text: '3' },
+    };
+    const fanTimerOptions = [0, 1, 2, 3, 5, 10]; // 分钟
 
-    function updateUI() {
-        // 扇叶
-        if (isOn && currentSpeed > 0) {
-            const cfg = config[currentSpeed];
-            blades.style.setProperty('--speed', cfg.speed);
+    function fanUpdateUI() {
+        const blades = document.getElementById('blades');
+        const strips = document.querySelectorAll('.wind-strip');
+        const label = document.getElementById('fanModeLabel');
+        const speedText = document.getElementById('fanSpeedText');
+        const power = document.getElementById('fanPower');
+        const swing = document.getElementById('fanSwing');
+        const wrap = document.getElementById('oscillateWrap');
+
+        if (fanOn && fanSpeed > 0) {
+            const c = fanCfg[fanSpeed];
+            blades.style.setProperty('--speed', c.speed);
             blades.classList.add('spinning');
-            blades.classList.remove('stopping');
-            modeLabel.textContent = cfg.label + (isSwinging ? ' · 摇头' : '');
-            speedText.innerHTML = cfg.text + ' <i>级</i>';
-            statusIcon.classList.add('on');
-
-            // 风效果
-            windStrips.forEach(s => {
-                s.style.setProperty('--wind-speed', cfg.windSpeed);
-                s.classList.add('active');
-            });
+            let txt = c.label;
+            if (fanSwinging) txt += ' · 摇头';
+            label.textContent = txt;
+            speedText.innerHTML = c.text + ' <i>级</i>';
+            strips.forEach(s => { s.style.setProperty('--wind-speed', c.windSpeed); s.classList.add('active'); });
         } else {
             blades.classList.remove('spinning');
-            modeLabel.textContent = '已关闭';
+            label.textContent = '已关闭';
             speedText.innerHTML = '0 <i>级</i>';
-            statusIcon.classList.remove('on');
-            windStrips.forEach(s => s.classList.remove('active'));
+            strips.forEach(s => s.classList.remove('active'));
         }
 
-        // 按钮状态
-        btnPower.classList.toggle('off', isOn);
+        power.classList.toggle('on', fanOn);
 
-        [btnLow, btnMid, btnHigh].forEach((btn, i) => {
-            const level = i + 1;
-            btn.classList.toggle('inactive', !isOn || currentSpeed !== level);
-            btn.classList.toggle('active', isOn && currentSpeed === level);
+        ['fanLow','fanMid','fanHigh'].forEach((id, i) => {
+            const btn = document.getElementById(id);
+            const lvl = i + 1;
+            btn.className = 'speed-btn';
+            if (fanOn && fanSpeed === lvl) {
+                btn.classList.add(lvl===1?'active-low':lvl===2?'active-mid':'active-high');
+            }
         });
 
-        btnSwing.classList.toggle('inactive', !isSwinging);
-        btnSwing.classList.toggle('active', isSwinging);
-
-        // 摇头
-        oscillateWrap.classList.toggle('oscillating', isOn && isSwinging);
+        swing.classList.toggle('active', fanSwinging);
+        wrap.classList.toggle('oscillating', fanOn && fanSwinging);
     }
 
-    window.togglePower = function() {
-        playClick();
-        isOn = !isOn;
-        if (isOn) {
-            currentSpeed = 1; // 开机默认低速
+    window.fanTogglePower = function() {
+        fanOn = !fanOn;
+        if (fanOn) fanSpeed = 1; else { fanSpeed = 0; fanClearTimer(); }
+        fanUpdateUI();
+    };
+    window.fanSetSpeed = function(lvl) {
+        if (!fanOn) fanOn = true;
+        fanSpeed = lvl;
+        fanUpdateUI();
+    };
+    window.fanToggleSwing = function() {
+        fanSwinging = !fanSwinging;
+        fanUpdateUI();
+    };
+
+    window.fanToggleTimer = function() {
+        const idx = fanTimerOptions.indexOf(fanTimerVal);
+        fanTimerVal = fanTimerOptions[(idx + 1) % fanTimerOptions.length];
+        const disp = document.getElementById('fanTimerDisplay');
+        const btn = document.getElementById('fanTimer');
+
+        if (fanTimerCountdown) { clearInterval(fanTimerCountdown); fanTimerCountdown = null; }
+
+        if (fanTimerVal === 0) {
+            disp.textContent = '';
+            btn.classList.remove('active');
         } else {
-            currentSpeed = 0;
+            btn.classList.add('active');
+            let seconds = fanTimerVal * 60;
+            function tick() {
+                const m = Math.floor(seconds / 60), s = seconds % 60;
+                disp.textContent = '定时关闭 ' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                if (seconds <= 0) {
+                    clearInterval(fanTimerCountdown);
+                    fanTimerCountdown = null;
+                    fanOn = false; fanSpeed = 0; fanTimerVal = 0;
+                    btn.classList.remove('active');
+                    disp.textContent = '已自动关闭';
+                    setTimeout(() => disp.textContent = '', 3000);
+                    fanUpdateUI();
+                    return;
+                }
+                seconds--;
+            }
+            tick();
+            fanTimerCountdown = setInterval(tick, 1000);
         }
-        updateUI();
     };
 
-    window.setSpeed = function(level) {
-        playClick();
-        if (!isOn) {
-            isOn = true;
+    function fanClearTimer() {
+        fanTimerVal = 0;
+        if (fanTimerCountdown) { clearInterval(fanTimerCountdown); fanTimerCountdown = null; }
+        document.getElementById('fanTimerDisplay').textContent = '';
+        document.getElementById('fanTimer').classList.remove('active');
+    }
+
+    fanUpdateUI();
+
+    /* ===== 空调逻辑 ===== */
+    let acOn = false, acMode = 'cold', acTemp = 26;
+    let acParticleTimer = null;
+
+    function acCreateParticles() {
+        const container = document.getElementById('acParticles');
+        // 清除旧粒子
+        container.querySelectorAll('.snow-particle, .heat-particle').forEach(p => p.remove());
+
+        if (!acOn) return;
+
+        if (acMode === 'cold') {
+            // 生成雪花粒子
+            const snowflakes = ['*', '+', '.', '*', '+', '.', '*', '+'];
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('span');
+                p.className = 'snow-particle';
+                p.textContent = snowflakes[i % snowflakes.length];
+                p.style.left = (10 + Math.random() * 80) + '%';
+                p.style.fontSize = (10 + Math.random() * 10) + 'px';
+                p.style.animationDelay = (Math.random() * 3) + 's';
+                p.style.animationDuration = (2 + Math.random() * 2) + 's';
+                container.appendChild(p);
+            }
+        } else {
+            // 生成热浪粒子
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.className = 'heat-particle';
+                p.style.left = (10 + Math.random() * 80) + '%';
+                p.style.width = (15 + Math.random() * 20) + 'px';
+                p.style.height = p.style.width;
+                p.style.animationDelay = (Math.random() * 2.5) + 's';
+                p.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+                container.appendChild(p);
+            }
         }
-        currentSpeed = level;
-        updateUI();
+    }
+
+    function acUpdateUI() {
+        const modeLabel = document.getElementById('acModeLabel');
+        const tempNum = document.getElementById('acTempNum');
+        const power = document.getElementById('acPower');
+        const coldBtn = document.getElementById('acCold');
+        const hotBtn = document.getElementById('acHot');
+        const topBar = document.getElementById('acTopBar');
+        const flap = document.getElementById('acFlap');
+        const screen = document.getElementById('acScreen');
+        const screenTemp = document.getElementById('acScreenTemp');
+        const screenMode = document.getElementById('acScreenMode');
+        const dot = document.getElementById('acDot');
+        const coldMist = document.getElementById('coldMist');
+        const heatWave = document.getElementById('heatWave');
+        const body = document.body;
+
+        tempNum.textContent = acTemp;
+        screenTemp.textContent = acTemp;
+
+        if (acOn) {
+            power.classList.add('on');
+            screen.classList.add('on');
+            flap.classList.add('open');
+
+            if (acMode === 'cold') {
+                modeLabel.textContent = '制冷模式';
+                screenMode.textContent = 'COOL';
+                screen.classList.remove('hot');
+                topBar.style.background = 'linear-gradient(90deg, #42a5f5, #1e88e5, #42a5f5)';
+                dot.className = 'ac-logo-dot on-cool';
+                coldMist.classList.add('active');
+                heatWave.classList.remove('active');
+                body.classList.add('cooling');
+                body.classList.remove('heating');
+            } else {
+                modeLabel.textContent = '制热模式';
+                screenMode.textContent = 'HEAT';
+                screen.classList.add('hot');
+                topBar.style.background = 'linear-gradient(90deg, #ffa726, #fb8c00, #ffa726)';
+                dot.className = 'ac-logo-dot on-hot';
+                coldMist.classList.remove('active');
+                heatWave.classList.add('active');
+                body.classList.remove('cooling');
+                body.classList.add('heating');
+            }
+            coldBtn.classList.toggle('inactive', acMode !== 'cold');
+            hotBtn.classList.toggle('inactive', acMode !== 'hot');
+
+            acCreateParticles();
+            if (acParticleTimer) clearInterval(acParticleTimer);
+            acParticleTimer = setInterval(acCreateParticles, 4000);
+        } else {
+            modeLabel.textContent = '已关闭';
+            power.classList.remove('on');
+            screen.classList.remove('on');
+            screen.classList.remove('hot');
+            flap.classList.remove('open');
+            topBar.style.background = 'linear-gradient(90deg, #42a5f5, #ab47bc, #42a5f5)';
+            dot.className = 'ac-logo-dot';
+            coldMist.classList.remove('active');
+            heatWave.classList.remove('active');
+            coldBtn.classList.add('inactive');
+            hotBtn.classList.add('inactive');
+            body.classList.remove('cooling', 'heating');
+
+            if (acParticleTimer) { clearInterval(acParticleTimer); acParticleTimer = null; }
+            document.getElementById('acParticles').querySelectorAll('.snow-particle, .heat-particle').forEach(p => p.remove());
+        }
+    }
+
+    window.acTogglePower = function() {
+        acOn = !acOn;
+        acUpdateUI();
+    };
+    window.acSetMode = function(mode) {
+        if (!acOn) acOn = true;
+        acMode = mode;
+        acUpdateUI();
+    };
+    window.acChangeTemp = function(delta) {
+        acTemp = Math.min(32, Math.max(16, acTemp + delta));
+        acUpdateUI();
     };
 
-    window.toggleSwing = function() {
-        playClick();
-        isSwinging = !isSwinging;
-        updateUI();
-    };
-
-    updateUI();
+    acUpdateUI();
 })();
 </script>
 </body>
