@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <title>便携小风扇</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #e8f4f8 0%, #d1ecf1 50%, #b8e0e8 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        h2 {
+            color: #546e7a;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+
+        h5 {
+            color: #90a4ae;
+            font-size: 13px;
+            font-weight: 400;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        h5 svg {
+            width: 18px;
+            height: 18px;
+            fill: #ffca28;
+            vertical-align: middle;
+        }
+
+        /* ===== 风扇主体 ===== */
+        .fan-body {
+            width: 280px;
+            background: linear-gradient(180deg, #ffffff, #f5f7fa);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
+            padding: 30px 20px 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .fan-body .top {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #42a5f5, #66bb6a, #42a5f5);
+            border-radius: 24px 24px 0 0;
+        }
+
+        /* 品牌标志 */
+        .brand {
+            font-size: 11px;
+            color: #b0bec5;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        /* 风扇头 - 摇头容器 */
+        .oscillate-wrap {
+            perspective: 600px;
+        }
+
+        .oscillate-wrap.oscillating .fan-head-wrap {
+            animation: oscillate 3s ease-in-out infinite;
+        }
+
+        @keyframes oscillate {
+            0%, 100% { transform: rotateY(-25deg); }
+            50% { transform: rotateY(25deg); }
+        }
+
+        .fan-head-wrap {
+            transition: transform 0.3s;
+        }
+
+        /* 风扇头 */
+        .fan-head {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 外圈网罩 */
+        .cage {
+            position: absolute;
+            width: 174px;
+            height: 174px;
+            border: 3px solid #cfd8dc;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 35%, rgba(207,216,220,0.06) 100%);
+        }
+
+        .cage-line {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 100%; height: 1px;
+            background: rgba(176,190,197,0.25);
+            transform-origin: center;
+        }
+
+        /* 扇叶 */
+        .blades {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+
+        .blades.spinning {
+            animation: spin var(--speed, 2s) linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .blade {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 60px; height: 6px;
+            transform-origin: 0 50%;
+        }
+
+        .blade::before {
+            content: '';
+            position: absolute;
+            top: -24px; left: 8px;
+            width: 52px; height: 54px;
+            border-radius: 0 70% 70% 0;
+            transform: skewY(-5deg);
+        }
+
+        .blade:nth-child(1) { transform: rotate(0deg); }
+        .blade:nth-child(2) { transform: rotate(72deg); }
+        .blade:nth-child(3) { transform: rotate(144deg); }
+        .blade:nth-child(4) { transform: rotate(216deg); }
+        .blade:nth-child(5) { transform: rotate(288deg); }
+
+        .blade:nth-child(odd)::before {
+            background: linear-gradient(135deg, rgba(66,165,245,0.8), rgba(41,121,255,0.6));
+        }
+        .blade:nth-child(even)::before {
+            background: linear-gradient(135deg, rgba(79,195,247,0.8), rgba(66,165,245,0.6));
+        }
+
+        .center-hub {
+            position: absolute;
+            width: 36px; height: 36px;
+            background: radial-gradient(circle at 35% 35%, #fff, #cfd8dc);
+            border: 2px solid #b0bec5;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+
+        /* 显示区域 */
+        .display {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .display .mode-label {
+            font-size: 12px;
+            color: #90a4ae;
+            letter-spacing: 1px;
+            min-height: 18px;
+        }
+
+        .display .speed-text {
+            font-size: 36px;
+            font-weight: 200;
+            color: #37474f;
+            line-height: 1.2;
+        }
+
+        .display .speed-text i {
+            font-style: normal;
+            font-size: 16px;
+            color: #78909c;
+        }
+
+        .status-icon {
+            display: block;
+            width: 20px;
+            height: 20px;
+            margin: 8px auto 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-icon.on {
+            opacity: 1;
+        }
+
+        /* ===== 风吹出效果 ===== */
+        .wind-area {
+            width: 280px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .wind-strip {
+            width: 3px;
+            height: 0;
+            background: linear-gradient(180deg, rgba(66,165,245,0.4), transparent);
+            border-radius: 2px;
+            transition: height 0.5s;
+        }
+
+        .wind-strip.active {
+            animation: windBlow var(--wind-speed, 1.5s) ease-in-out infinite;
+        }
+
+        @keyframes windBlow {
+            0%, 100% { height: 10px; opacity: 0.3; }
+            50% { height: 50px; opacity: 0.7; }
+        }
+
+        /* ===== 按钮组 ===== */
+        .buttons {
+            width: 280px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            position: relative;
+        }
+
+        .button:active {
+            transform: scale(0.92);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+
+        .button svg {
+            width: 26px;
+            height: 26px;
+            fill: #fff;
+        }
+
+        .button.inactive svg {
+            fill: #78909c;
+        }
+
+        /* 开关按钮 */
+        .btn-power {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+        }
+        .btn-power.off {
+            background: linear-gradient(135deg, #ef5350, #e53935);
+        }
+
+        /* 挡位按钮 */
+        .btn-low {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+        }
+        .btn-low.active {
+            box-shadow: 0 3px 16px rgba(102,187,106,0.5);
+        }
+
+        .btn-mid {
+            background: linear-gradient(135deg, #ffb74d, #ffa726);
+        }
+        .btn-mid.active {
+            box-shadow: 0 3px 16px rgba(255,167,38,0.5);
+        }
+
+        .btn-high {
+            background: linear-gradient(135deg, #ef5350, #e53935);
+        }
+        .btn-high.active {
+            box-shadow: 0 3px 16px rgba(239,83,80,0.5);
+        }
+
+        /* 摇头按钮 */
+        .btn-swing {
+            background: linear-gradient(135deg, #42a5f5, #1e88e5);
+        }
+        .btn-swing.active {
+            box-shadow: 0 3px 16px rgba(66,165,245,0.5);
+        }
+
+        .button.inactive {
+            background: #e0e0e0 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        /* 按钮标签 */
+        .btn-label {
+            font-size: 11px;
+            color: #90a4ae;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 底部 */
+        .bottom-link {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #b0bec5;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .bottom-link span {
+            color: #90caf9;
+        }
+
+        /* 选中指示环 */
+        .button::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            transition: border-color 0.2s;
+        }
+
+        .button.active::after {
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        /* 风扇关闭时扇叶减速 */
+        .blades.stopping {
+            animation: spin 3s linear;
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 微信遮罩引导 -->
+<div id="wxMask" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); color:#fff; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:80px; text-align:center; font-size:18px; line-height:2;">
+    <div style="position:absolute; top:20px; right:24px;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.07-1.38"/><path d="M16 3.5l4 0l0 4"/><path d="M20 3.5l-6 6"/></svg>
+    </div>
+    <div style="font-size:50px; margin-bottom:10px;">↗</div>
+    <div>请点击右上角 <b>「···」</b></div>
+    <div>选择 <b>「在浏览器中打开」</b></div>
+    <div style="margin-top:20px; font-size:14px; color:#aaa;">微信内无法正常使用，需在浏览器中打开</div>
+</div>
+
+<script>
+// 检测微信浏览器
+(function(){
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('micromessenger') !== -1) {
+        document.getElementById('wxMask').style.display = 'flex';
+    }
+})();
+</script>
+
+<h2>便携小风扇</h2>
+<h5>
+    <svg viewBox="0 0 24 24"><path d="M12 3c-.46 0-.93.04-1.4.14-2.76.53-4.96 2.76-5.48 5.52-.48 2.61.48 5.01 2.22 6.56.43.38.66.91.66 1.47V19c0 1.1.9 2 2 2h.28c.35.6.98 1 1.72 1s1.38-.4 1.72-1H14c1.1 0 2-.9 2-2v-2.31c0-.55.22-1.09.64-1.46C18.09 13.95 19 12.08 19 10c0-3.87-3.13-7-7-7z"/></svg>
+    <span>Tip: 清凉一夏，随身携带！</span>
+</h5>
+
+<div class="fan-body">
+    <div class="top"></div>
+    <div class="brand">MINI FAN</div>
+
+    <div class="oscillate-wrap" id="oscillateWrap">
+        <div class="fan-head-wrap">
+            <div class="fan-head">
+                <div class="cage">
+                    <div class="cage-line" style="transform:rotate(0deg)"></div>
+                    <div class="cage-line" style="transform:rotate(30deg)"></div>
+                    <div class="cage-line" style="transform:rotate(60deg)"></div>
+                    <div class="cage-line" style="transform:rotate(90deg)"></div>
+                    <div class="cage-line" style="transform:rotate(120deg)"></div>
+                    <div class="cage-line" style="transform:rotate(150deg)"></div>
+                </div>
+                <div class="blades" id="blades">
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                </div>
+                <div class="center-hub"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="display">
+        <div class="mode-label" id="modeLabel">已关闭</div>
+        <div class="speed-text" id="speedText">0 <i>级</i></div>
+    </div>
+
+    <svg class="status-icon" id="statusIcon" viewBox="0 0 24 24" fill="#66bb6a">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+</div>
+
+<!-- 风吹出效果 -->
+<div class="wind-area" id="windArea">
+    <div class="wind-strip" style="animation-delay:0s"></div>
+    <div class="wind-strip" style="animation-delay:0.15s"></div>
+    <div class="wind-strip" style="animation-delay:0.3s"></div>
+    <div class="wind-strip" style="animation-delay:0.05s"></div>
+    <div class="wind-strip" style="animation-delay:0.2s"></div>
+    <div class="wind-strip" style="animation-delay:0.35s"></div>
+    <div class="wind-strip" style="animation-delay:0.1s"></div>
+    <div class="wind-strip" style="animation-delay:0.25s"></div>
+    <div class="wind-strip" style="animation-delay:0.4s"></div>
+</div>
+
+<!-- 控制按钮 -->
+<div class="buttons">
+    <div class="btn-group">
+        <div class="button btn-low inactive" id="btnLow" onclick="setSpeed(1)">
+            <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2-1 1.7L10 13V6h2z"/></svg>
+        </div>
+        <div class="btn-label">低速</div>
+    </div>
+    <div class="btn-group">
+        <div class="button btn-power" id="btnPower" onclick="togglePower()">
+            <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+        </div>
+        <div class="btn-label">开关</div>
+    </div>
+    <div class="btn-group">
+        <div class="button btn-mid inactive" id="btnMid" onclick="setSpeed(2)">
+            <svg viewBox="0 0 24 24"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
+        </div>
+        <div class="btn-label">中速</div>
+    </div>
+</div>
+
+<div class="buttons" style="margin-top:12px">
+    <div class="btn-group">
+        <div class="button btn-high inactive" id="btnHigh" onclick="setSpeed(3)">
+            <svg viewBox="0 0 24 24"><path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69zM9.12 17.42c.16-.98.72-1.77 1.32-2.47 1.05-1.22 2.1-2.47 2.37-4.06.03-.17.27-.18.31-.01.65 2.78-1.48 4.16-1.77 6.4-.08.6.14 1.27.53 1.73.08.1-.01.25-.13.21-1.44-.49-2.83-1.28-2.63-1.8z"/></svg>
+        </div>
+        <div class="btn-label">高速</div>
+    </div>
+    <div class="btn-group">
+        <div class="button btn-swing inactive" id="btnSwing" onclick="toggleSwing()">
+            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        </div>
+        <div class="btn-label">摇头</div>
+    </div>
+</div>
+
+<a class="bottom-link" href="javascript:void(0)">
+    <script>document.write(new Date().getFullYear())</script> © Mini Fan <span>- 清凉随行</span>
+</a>
+
+<!-- 音效 -->
+<audio preload="auto" id="clickSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVoGAACA"></audio>
+
+<script>
+(function() {
+    const blades = document.getElementById('blades');
+    const oscillateWrap = document.getElementById('oscillateWrap');
+    const modeLabel = document.getElementById('modeLabel');
+    const speedText = document.getElementById('speedText');
+    const statusIcon = document.getElementById('statusIcon');
+    const btnPower = document.getElementById('btnPower');
+    const btnLow = document.getElementById('btnLow');
+    const btnMid = document.getElementById('btnMid');
+    const btnHigh = document.getElementById('btnHigh');
+    const btnSwing = document.getElementById('btnSwing');
+    const windStrips = document.querySelectorAll('.wind-strip');
+
+    let isOn = false;
+    let currentSpeed = 0;
+    let isSwinging = false;
+
+    const config = {
+        1: { speed: '1.6s',  label: '低速模式',  windSpeed: '2s',    text: '1' },
+        2: { speed: '0.7s',  label: '中速模式',  windSpeed: '1.2s',  text: '2' },
+        3: { speed: '0.3s',  label: '高速模式',  windSpeed: '0.6s',  text: '3' },
+    };
+
+    function playClick() {
+        // 简单的点击反馈
+        if (navigator.vibrate) navigator.vibrate(15);
+    }
+
+    function updateUI() {
+        // 扇叶
+        if (isOn && currentSpeed > 0) {
+            const cfg = config[currentSpeed];
+            blades.style.setProperty('--speed', cfg.speed);
+            blades.classList.add('spinning');
+            blades.classList.remove('stopping');
+            modeLabel.textContent = cfg.label + (isSwinging ? ' · 摇头' : '');
+            speedText.innerHTML = cfg.text + ' <i>级</i>';
+            statusIcon.classList.add('on');
+
+            // 风效果
+            windStrips.forEach(s => {
+                s.style.setProperty('--wind-speed', cfg.windSpeed);
+                s.classList.add('active');
+            });
+        } else {
+            blades.classList.remove('spinning');
+            modeLabel.textContent = '已关闭';
+            speedText.innerHTML = '0 <i>级</i>';
+            statusIcon.classList.remove('on');
+            windStrips.forEach(s => s.classList.remove('active'));
+        }
+
+        // 按钮状态
+        btnPower.classList.toggle('off', isOn);
+
+        [btnLow, btnMid, btnHigh].forEach((btn, i) => {
+            const level = i + 1;
+            btn.classList.toggle('inactive', !isOn || currentSpeed !== level);
+            btn.classList.toggle('active', isOn && currentSpeed === level);
+        });
+
+        btnSwing.classList.toggle('inactive', !isSwinging);
+        btnSwing.classList.toggle('active', isSwinging);
+
+        // 摇头
+        oscillateWrap.classList.toggle('oscillating', isOn && isSwinging);
+    }
+
+    window.togglePower = function() {
+        playClick();
+        isOn = !isOn;
+        if (isOn) {
+            currentSpeed = 1; // 开机默认低速
+        } else {
+            currentSpeed = 0;
+        }
+        updateUI();
+    };
+
+    window.setSpeed = function(level) {
+        playClick();
+        if (!isOn) {
+            isOn = true;
+        }
+        currentSpeed = level;
+        updateUI();
+    };
+
+    window.toggleSwing = function() {
+        playClick();
+        isSwinging = !isSwinging;
+        updateUI();
+    };
+
+    updateUI();
+})();
+</script>
+</body>
+</html>
